@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# This script runs whenever the flake.nix content changes
+# flake.nix hash: {{ include "flake.nix" | sha256sum }}
+
+echo "Detected changes in flake.nix, rebuilding..."
+
+# Source nix if it exists
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+
+# Update and rebuild the flake from the chezmoi source directory
+cd {{ .chezmoi.sourceDir }} && \
+nix flake update && \
+nix build
