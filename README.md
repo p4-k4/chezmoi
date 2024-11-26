@@ -51,7 +51,7 @@ This will automatically:
 
 ### Package Management
 
-- Add new packages:
+- Add or remove packages:
   1. Edit the flake.nix file:
      ```bash
      chezmoi edit flake.nix
@@ -60,41 +60,17 @@ This will automatically:
      ```bash
      chezmoi apply
      ```
-
-- Remove packages:
-  1. Remove the package from flake.nix:
+  3. Restart your shell or run:
      ```bash
-     chezmoi edit flake.nix
+     exec $SHELL
      ```
-  2. Apply changes:
-     ```bash
-     chezmoi apply
-     ```
-  The system will automatically:
-  - Remove the existing profile
-  - Clean up unused store paths
-  - Build the new configuration
-  - Install only the packages currently defined in flake.nix
+     This ensures new commands are available in your PATH.
 
-### System Maintenance
-
-- View current profiles:
-  ```bash
-  nix profile list
-  ```
-
-- Manually remove profiles:
-  ```bash
-  nix profile remove <profile-path>
-  ```
-
-- Manual garbage collection:
-  ```bash
-  # Clean up unused store paths
-  nix store gc
-  ```
-
-Note: The rebuild script automatically handles profile management and garbage collection during updates.
+The system will automatically:
+- Update the flake lock file
+- Build the new configuration
+- Install the updated profile
+- Clean up old store paths
 
 ### Updating
 
@@ -134,10 +110,7 @@ Note: The rebuild script automatically handles profile management and garbage co
 - Managed through flake.nix
 - Automatically rebuilds when changes are detected
 - Handles all package installations and removals
-- Maintains a clean system by:
-  - Removing existing profile before installing new one
-  - Running garbage collection to clean up unused store paths
-  - Providing detailed feedback during the rebuild process
+- Maintains a clean system by running garbage collection
 
 ## Removal
 
@@ -168,27 +141,17 @@ To uninstall Nix (installed by Determinate Systems):
      git commit -m "your message"
      ```
 
-2. Flake build errors:
+2. New packages not available after installation:
+   - Restart your shell:
+     ```bash
+     exec $SHELL
+     ```
+   - Or start a new terminal window
+
+3. Flake build errors:
    - Check flake.nix syntax
    - Ensure all inputs are available
    - Try updating flake.lock: `nix flake update`
-
-3. Package management issues:
-   - Check current profiles: `nix profile list`
-   - Verify package is in flake.nix
-   - Try removing and reinstalling the profile:
-     ```bash
-     nix profile remove .#default
-     nix profile install .#default --accept-flake-config
-     ```
-   - Run garbage collection: `nix store gc`
-   - Check the rebuild script output for detailed feedback
-
-4. New packages not available:
-   - Ensure the package is properly added to flake.nix
-   - Try sourcing the profile: `. ~/.nix-profile/etc/profile.d/nix.sh`
-   - Check if the package is installed: `nix profile list`
-   - Run `chezmoi apply` to rebuild
 
 ## Contributing
 
