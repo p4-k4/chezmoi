@@ -18,12 +18,25 @@ nix profile list
 
 # Clean up existing profiles
 echo "Removing existing profiles..."
-while IFS= read -r profile_index; do
-    if [ ! -z "$profile_index" ]; then
-        echo "Removing profile index: $profile_index"
-        nix profile remove "$profile_index" || echo "Failed to remove profile $profile_index"
+if command -v jq >/dev/null 2>&1; then
+    profiles=$(nix profile list --json | jq -r '.[].id')
+    if [ ! -z "$profiles" ]; then
+        echo "$profiles" | while read -r id; do
+            echo "Removing profile id: $id"
+            nix profile remove "$id" || echo "Failed to remove profile $id"
+        done
+    else
+        echo "No profiles found to remove"
     fi
-done < <(nix profile list | grep -v "^$" | awk 'NR>1 {print $1}')
+else
+    echo "Warning: jq not found, falling back to basic profile removal"
+    while IFS= read -r profile_index; do
+        if [ ! -z "$profile_index" ]; then
+            echo "Removing profile index: $profile_index"
+            nix profile remove "$profile_index" || echo "Failed to remove profile $profile_index"
+        fi
+    done < <(nix profile list | grep -v "^$" | awk 'NR>1 {print $1}')
+fi
 
 # Clean up old store paths
 echo "Running garbage collection..."
@@ -39,15 +52,26 @@ nix build
 echo "Installing new profile..."
 nix profile install .#default --accept-flake-config
 
-# Debug: Show new profile state
-echo "New profile state:"
-nix profile list
+# Update PATH to include new profile
+export PATH="$HOME/.nix-profile/bin:$PATH"
 
 # Source the new profile
 if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
     echo "Sourcing new profile..."
     . "$HOME/.nix-profile/etc/profile.d/nix.sh"
 fi
+
+# Debug: Show new profile state
+echo "New profile state:"
+nix profile list
+
+# Debug: Show PATH
+echo "Current PATH:"
+echo "$PATH"
+
+# Debug: List contents of nix profile bin
+echo "Contents of ~/.nix-profile/bin:"
+ls -la ~/.nix-profile/bin/
 
 # Verify installation
 if command -v cowsay &> /dev/null; then
