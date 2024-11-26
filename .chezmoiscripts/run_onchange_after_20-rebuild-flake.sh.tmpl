@@ -14,32 +14,21 @@ fi
 
 cd {{ .chezmoi.sourceDir }}
 
-# Update flake
+# Update and rebuild the flake
 echo "Updating flake..."
 nix flake update
 
-# Build new configuration
 echo "Building..."
 nix build
 
-# Switch to the new configuration
-echo "Switching to new configuration..."
-# First try to remove any existing profile
-nix profile remove '.#default' 2>/dev/null || true
-# Then install the new one
-nix profile install '.#default' --accept-flake-config
+echo "Installing new profile..."
+nix profile install .#default --accept-flake-config
 
-# Clean up old generations
-echo "Cleaning up old generations..."
+# Clean up old store paths
+echo "Running garbage collection..."
 nix store gc
-
-# Source the new profile
-if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-fi
 
 echo "Flake update complete. New profile state:"
 nix profile list
 
-# Rehash to ensure new commands are available
-hash -r
+echo "Note: You may need to restart your shell to use new commands"
