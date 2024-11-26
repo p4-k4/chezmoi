@@ -10,13 +10,33 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
     . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
-# Clean up existing profile
-echo "Removing existing profile..."
-nix profile remove '.*'
+# Clean up existing profiles
+echo "Removing existing profiles..."
+PROFILES=$(nix profile list | awk '{print $1}' | grep -v "^$")
+if [ -n "$PROFILES" ]; then
+    echo "Found profiles to remove:"
+    echo "$PROFILES"
+    while IFS= read -r profile; do
+        echo "Removing profile: $profile"
+        nix profile remove "$profile"
+    done <<< "$PROFILES"
+else
+    echo "No existing profiles found."
+fi
 
 # Update and rebuild the flake
 cd {{ .chezmoi.sourceDir }} && \
+echo "Updating flake..." && \
 nix flake update && \
+echo "Building..." && \
 nix build && \
 echo "Installing new profile..." && \
 nix profile install .#default
+
+# Verify installation
+if [ $? -eq 0 ]; then
+    echo "Successfully rebuilt and installed new configuration"
+else
+    echo "Error: Failed to install new configuration"
+    exit 1
+fi

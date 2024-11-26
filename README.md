@@ -71,9 +71,19 @@ This will automatically:
      chezmoi apply
      ```
   The system will automatically:
-  - Remove all existing packages from the profile
+  - List and remove all existing Nix profiles
+  - Build the new configuration
   - Install only the packages currently defined in flake.nix
-  - This ensures removed packages are properly uninstalled
+
+- View current profiles:
+  ```bash
+  nix profile list
+  ```
+
+- Manually remove profiles:
+  ```bash
+  nix profile remove <profile-name>
+  ```
 
 ### Updating
 
@@ -113,7 +123,8 @@ This will automatically:
 - Managed through flake.nix
 - Automatically rebuilds when changes are detected
 - Handles all package installations and removals
-- Maintains a clean profile by removing old packages before applying new configuration
+- Maintains a clean profile by removing existing profiles before applying new configuration
+- Provides detailed feedback during rebuild process
 
 ## Removal
 
@@ -149,10 +160,11 @@ To uninstall Nix (installed by Determinate Systems):
    - Ensure all inputs are available
    - Try updating flake.lock: `nix flake update`
 
-3. Packages not being removed:
-   - Ensure you've removed the package from flake.nix
-   - Run `chezmoi apply` to trigger a complete rebuild
-   - The script will automatically clean the profile and reinstall only current packages
+3. Package management issues:
+   - Check current profiles: `nix profile list`
+   - Manually remove problematic profiles: `nix profile remove <profile-name>`
+   - Run `chezmoi apply` to rebuild with clean state
+   - Check the rebuild script output for detailed feedback
 
 ## Contributing
 
