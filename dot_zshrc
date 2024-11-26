@@ -1,0 +1,28 @@
+# Path to your Oh My Zsh installation.
+export ZSH="$HOME/.oh-my-zsh"
+export EDITOR='nvim'
+
+ZSH_THEME="robbyrussell"
+
+plugins=(git autojump flutter zsh-autosuggestions zsh-completions)
+autoload -U compinit && compinit
+
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+
+source $ZSH/oh-my-zsh.sh
+
+bindkey -v
+
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+
+alias ls='lsd'
+alias l='ls -l'
+alias la='ls -a'
+alias lla='ls -la'
+alias lt='ls --tree'
+
+# eval "$(starship init zsh)"
+
+# [ -f /Users/paka/.dart-cli-completion/zsh-config.zsh ]] && . /Users/paka/.dart-cli-completion/zsh-config.zsh || true

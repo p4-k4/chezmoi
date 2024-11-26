@@ -1,0 +1,88 @@
+/* Tokyonight colors */
+@define-color bg rgba(26, 27, 38, 0.75);
+@define-color fg #c0caf5;
+@define-color fg_dark #a9b1d6;
+@define-color blue #7aa2f7;
+@define-color cyan #7dcfff;
+@define-color green #9ece6a;
+@define-color purple #bb9af7;
+@define-color red #f7768e;
+@define-color yellow #e0af68;
+
+/* Reset all styles */
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 13px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#waybar {
+    background: @bg;
+    color: @fg;
+}
+
+#workspaces button {
+    padding: 0 8px;
+    color: @fg_dark;
+    background: transparent;
+}
+
+#workspaces button.active {
+    color: @blue;
+}
+
+#workspaces button.urgent {
+    color: @red;
+}
+
+#cpu,
+#memory,
+#temperature,
+#pulseaudio,
+#network,
+#clock,
+#tray {
+    padding: 0 12px;
+    margin: 4px 4px;
+}
+
+#cpu {
+    color: @blue;
+}
+
+#memory {
+    color: @purple;
+}
+
+#temperature {
+    color: @green;
+}
+
+#temperature.critical {
+    color: @red;
+}
+
+#pulseaudio {
+    color: @yellow;
+}
+
+#network {
+    color: @cyan;
+}
+
+#network.disconnected {
+    color: @red;
+}
+
+#clock {
+    color: @fg;
+}
+
+#tray {
+    padding: 0 8px;
+    margin: 4px 4px;
+}
