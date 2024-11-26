@@ -12,29 +12,18 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
     . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
-# Debug: Show current profiles
+# Show current profiles
 echo "Current profiles:"
 nix profile list
 
 # Clean up existing profiles
 echo "Removing existing profiles..."
-if command -v jq >/dev/null 2>&1; then
-    # Get the list index numbers from the profile list
-    nix profile list | grep -v "^$" | tail -n +2 | cut -d' ' -f1 | while read -r index; do
-        if [ ! -z "$index" ]; then
-            echo "Removing profile at index: $index"
-            nix profile remove "$index" || echo "Failed to remove profile at index $index"
-        fi
-    done
-else
-    echo "Warning: falling back to basic profile removal"
-    while IFS= read -r profile_index; do
-        if [ ! -z "$profile_index" ]; then
-            echo "Removing profile index: $profile_index"
-            nix profile remove "$profile_index" || echo "Failed to remove profile $profile_index"
-        fi
-    done < <(nix profile list | grep -v "^$" | awk 'NR>1 {print $1}')
-fi
+while IFS= read -r index; do
+    if [ ! -z "$index" ]; then
+        echo "Removing profile at index: $index"
+        nix profile remove "$index" || true
+    fi
+done < <(nix profile list | grep -v "^$" | tail -n +2 | cut -d' ' -f1)
 
 # Clean up old store paths
 echo "Running garbage collection..."
@@ -45,49 +34,14 @@ cd {{ .chezmoi.sourceDir }} && \
 echo "Updating flake..." && \
 nix flake update && \
 echo "Building..." && \
-nix build
-
-echo "Installing new profile..."
+nix build && \
+echo "Installing new profile..." && \
 nix profile install .#default --accept-flake-config
-
-# Update PATH to include new profile
-export PATH="$HOME/.nix-profile/bin:$PATH"
 
 # Source the new profile
 if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-    echo "Sourcing new profile..."
     . "$HOME/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-# Debug: Show new profile state
-echo "New profile state:"
+echo "Flake update complete. New profile state:"
 nix profile list
-
-# Debug: Show PATH
-echo "Current PATH:"
-echo "$PATH"
-
-# Debug: List contents of nix profile bin
-echo "Contents of ~/.nix-profile/bin:"
-ls -la ~/.nix-profile/bin/
-
-# Verify installation
-if command -v cowsay &> /dev/null; then
-    echo "Successfully installed cowsay"
-    cowsay "Installation successful!"
-else
-    echo "Error: cowsay not found after installation"
-    echo "Debug information:"
-    echo "PATH=$PATH"
-    echo "Profile contents:"
-    ls -la ~/.nix-profile/bin/
-    
-    # Check if cowsay exists in the nix profile
-    if [ -f "$HOME/.nix-profile/bin/cowsay" ]; then
-        echo "cowsay binary exists but is not in PATH"
-        file "$HOME/.nix-profile/bin/cowsay"
-    else
-        echo "cowsay binary not found in nix profile"
-    fi
-    exit 1
-fi
