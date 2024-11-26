@@ -31,4 +31,5 @@ nix store gc
 echo "Flake update complete. New profile state:"
 nix profile list
 
-echo "Note: You may need to restart your shell to use new commands"
+echo -e "\nIMPORTANT: You must restart your shell for changes to take effect:"
+echo "  exec \$SHELL"

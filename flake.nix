@@ -55,7 +55,6 @@
         podman-compose
         buildah
         skopeo
-        cowsay
         # docker-client
         # docker-compose
         distrobox
