@@ -12,31 +12,26 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
     . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
-# Show current profiles
-echo "Current profiles:"
-nix profile list
+cd {{ .chezmoi.sourceDir }}
 
-# Clean up existing profiles
-echo "Removing existing profiles..."
-while IFS= read -r index; do
-    if [ ! -z "$index" ]; then
-        echo "Removing profile at index: $index"
-        nix profile remove "$index" || true
-    fi
-done < <(nix profile list | grep -v "^$" | tail -n +2 | cut -d' ' -f1)
+# Update flake
+echo "Updating flake..."
+nix flake update
 
-# Clean up old store paths
-echo "Running garbage collection..."
+# Build new configuration
+echo "Building..."
+nix build
+
+# Switch to the new configuration
+echo "Switching to new configuration..."
+# First try to remove any existing profile
+nix profile remove '.#default' 2>/dev/null || true
+# Then install the new one
+nix profile install '.#default' --accept-flake-config
+
+# Clean up old generations
+echo "Cleaning up old generations..."
 nix store gc
-
-# Update and rebuild the flake
-cd {{ .chezmoi.sourceDir }} && \
-echo "Updating flake..." && \
-nix flake update && \
-echo "Building..." && \
-nix build && \
-echo "Installing new profile..." && \
-nix profile install .#default --accept-flake-config
 
 # Source the new profile
 if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
@@ -45,3 +40,6 @@ fi
 
 echo "Flake update complete. New profile state:"
 nix profile list
+
+# Rehash to ensure new commands are available
+hash -r
