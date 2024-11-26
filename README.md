@@ -71,9 +71,12 @@ This will automatically:
      chezmoi apply
      ```
   The system will automatically:
-  - List and remove all existing Nix profiles
+  - Remove the existing profile
+  - Clean up unused store paths
   - Build the new configuration
   - Install only the packages currently defined in flake.nix
+
+### System Maintenance
 
 - View current profiles:
   ```bash
@@ -82,8 +85,16 @@ This will automatically:
 
 - Manually remove profiles:
   ```bash
-  nix profile remove <profile-name>
+  nix profile remove <profile-path>
   ```
+
+- Manual garbage collection:
+  ```bash
+  # Clean up unused store paths
+  nix store gc
+  ```
+
+Note: The rebuild script automatically handles profile management and garbage collection during updates.
 
 ### Updating
 
@@ -123,8 +134,10 @@ This will automatically:
 - Managed through flake.nix
 - Automatically rebuilds when changes are detected
 - Handles all package installations and removals
-- Maintains a clean profile by removing existing profiles before applying new configuration
-- Provides detailed feedback during rebuild process
+- Maintains a clean system by:
+  - Removing existing profile before installing new one
+  - Running garbage collection to clean up unused store paths
+  - Providing detailed feedback during the rebuild process
 
 ## Removal
 
@@ -162,9 +175,20 @@ To uninstall Nix (installed by Determinate Systems):
 
 3. Package management issues:
    - Check current profiles: `nix profile list`
-   - Manually remove problematic profiles: `nix profile remove <profile-name>`
-   - Run `chezmoi apply` to rebuild with clean state
+   - Verify package is in flake.nix
+   - Try removing and reinstalling the profile:
+     ```bash
+     nix profile remove .#default
+     nix profile install .#default --accept-flake-config
+     ```
+   - Run garbage collection: `nix store gc`
    - Check the rebuild script output for detailed feedback
+
+4. New packages not available:
+   - Ensure the package is properly added to flake.nix
+   - Try sourcing the profile: `. ~/.nix-profile/etc/profile.d/nix.sh`
+   - Check if the package is installed: `nix profile list`
+   - Run `chezmoi apply` to rebuild
 
 ## Contributing
 

@@ -55,8 +55,9 @@
         podman-compose
         buildah
         skopeo
-        docker-client
-        docker-compose
+        cowsay
+        # docker-client
+        # docker-compose
         distrobox
         # Common development tools
         git

@@ -12,21 +12,14 @@ fi
 
 # Clean up existing profiles
 echo "Removing existing profiles..."
-while IFS= read -r profile_id; do
-    if [ ! -z "$profile_id" ]; then
-        echo "Removing profile ID: $profile_id"
-        nix profile remove "$profile_id"
-    fi
-done < <(nix profile list | grep -v "^$" | tail -n +2 | cut -d' ' -f1)
-
-# Clean up old generations and garbage collect
-echo "Cleaning up old generations and garbage collecting..."
-if command -v sudo >/dev/null 2>&1; then
-    sudo nix-collect-garbage -d
-else
-    echo "Warning: sudo not available. Running garbage collection without root privileges."
-    nix-collect-garbage -d
+if nix profile list | grep -q "default"; then
+    echo "Removing existing default profile..."
+    nix profile remove "git+file://$(pwd)#default" || true
 fi
+
+# Clean up old store paths
+echo "Running garbage collection..."
+nix store gc
 
 # Update and rebuild the flake
 cd {{ .chezmoi.sourceDir }} && \
@@ -35,12 +28,22 @@ nix flake update && \
 echo "Building..." && \
 nix build && \
 echo "Installing new profile..." && \
-nix profile install .#default
+nix profile install .#default --accept-flake-config
 
 # Verify installation
 if [ $? -eq 0 ]; then
     echo "Successfully rebuilt and installed new configuration"
+    
+    # Source the new profile to make new commands available immediately
+    if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    fi
 else
     echo "Error: Failed to install new configuration"
     exit 1
+fi
+
+# Verify specific packages are available
+if ! command -v cowsay &> /dev/null; then
+    echo "Warning: cowsay command not found after installation. Please check your flake.nix configuration."
 fi
