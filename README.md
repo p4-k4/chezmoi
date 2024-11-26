@@ -49,6 +49,32 @@ This will automatically:
   chezmoi add ~/.config/new/config
   ```
 
+### Package Management
+
+- Add new packages:
+  1. Edit the flake.nix file:
+     ```bash
+     chezmoi edit flake.nix
+     ```
+  2. Apply changes:
+     ```bash
+     chezmoi apply
+     ```
+
+- Remove packages:
+  1. Remove the package from flake.nix:
+     ```bash
+     chezmoi edit flake.nix
+     ```
+  2. Apply changes:
+     ```bash
+     chezmoi apply
+     ```
+  The system will automatically:
+  - Remove all existing packages from the profile
+  - Install only the packages currently defined in flake.nix
+  - This ensures removed packages are properly uninstalled
+
 ### Updating
 
 - Pull and apply latest changes:
@@ -86,7 +112,8 @@ This will automatically:
 
 - Managed through flake.nix
 - Automatically rebuilds when changes are detected
-- Handles all package installations
+- Handles all package installations and removals
+- Maintains a clean profile by removing old packages before applying new configuration
 
 ## Removal
 
@@ -121,6 +148,11 @@ To uninstall Nix (installed by Determinate Systems):
    - Check flake.nix syntax
    - Ensure all inputs are available
    - Try updating flake.lock: `nix flake update`
+
+3. Packages not being removed:
+   - Ensure you've removed the package from flake.nix
+   - Run `chezmoi apply` to trigger a complete rebuild
+   - The script will automatically clean the profile and reinstall only current packages
 
 ## Contributing
 

@@ -10,7 +10,13 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
     . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
-# Update and rebuild the flake from the chezmoi source directory
+# Clean up existing profile
+echo "Removing existing profile..."
+nix profile remove '.*'
+
+# Update and rebuild the flake
 cd {{ .chezmoi.sourceDir }} && \
 nix flake update && \
-nix build
+nix build && \
+echo "Installing new profile..." && \
+nix profile install .#default
