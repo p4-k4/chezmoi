@@ -19,17 +19,15 @@ nix profile list
 # Clean up existing profiles
 echo "Removing existing profiles..."
 if command -v jq >/dev/null 2>&1; then
-    profiles=$(nix profile list --json | jq -r '.[].id')
-    if [ ! -z "$profiles" ]; then
-        echo "$profiles" | while read -r id; do
-            echo "Removing profile id: $id"
-            nix profile remove "$id" || echo "Failed to remove profile $id"
-        done
-    else
-        echo "No profiles found to remove"
-    fi
+    # Get the list index numbers from the profile list
+    nix profile list | grep -v "^$" | tail -n +2 | cut -d' ' -f1 | while read -r index; do
+        if [ ! -z "$index" ]; then
+            echo "Removing profile at index: $index"
+            nix profile remove "$index" || echo "Failed to remove profile at index $index"
+        fi
+    done
 else
-    echo "Warning: jq not found, falling back to basic profile removal"
+    echo "Warning: falling back to basic profile removal"
     while IFS= read -r profile_index; do
         if [ ! -z "$profile_index" ]; then
             echo "Removing profile index: $profile_index"
@@ -83,5 +81,13 @@ else
     echo "PATH=$PATH"
     echo "Profile contents:"
     ls -la ~/.nix-profile/bin/
+    
+    # Check if cowsay exists in the nix profile
+    if [ -f "$HOME/.nix-profile/bin/cowsay" ]; then
+        echo "cowsay binary exists but is not in PATH"
+        file "$HOME/.nix-profile/bin/cowsay"
+    else
+        echo "cowsay binary not found in nix profile"
+    fi
     exit 1
 fi
