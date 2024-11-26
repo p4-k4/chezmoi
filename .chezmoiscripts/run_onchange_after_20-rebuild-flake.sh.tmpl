@@ -1,35 +1,26 @@
 #!/bin/bash
 
-# This script runs whenever the flake.nix content changes
-# flake.nix hash: {{ include "flake.nix" | sha256sum }}
+# The script will run when flake.nix changes
+# {{ include "flake.nix" | sha256sum }}
 
-set -e  # Exit on error
+echo "🔄 Rebuilding Nix flake..."
 
-echo "Detected changes in flake.nix, rebuilding..."
-
-# Source nix if it exists
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-fi
-
+# Change to chezmoi source directory
 cd {{ .chezmoi.sourceDir }}
 
-# Update and rebuild the flake
-echo "Updating flake..."
+# Update flake lock file
 nix flake update
 
-echo "Building..."
-nix build
+echo "📋 removing chezmoi profile:"
 
-echo "Installing new profile..."
+nix profile remove chezmoi
+
+# Clean up old generations
+echo "🧹 Cleaning up old generations..."
+nix-collect-garbage -d
+
+# Install new profile
+echo "📦 Installing new profile..."
 nix profile install .#default --accept-flake-config
 
-# Clean up old store paths
-echo "Running garbage collection..."
-nix store gc
-
-echo "Flake update complete. New profile state:"
-nix profile list
-
-echo -e "\nIMPORTANT: You must restart your shell for changes to take effect:"
-echo "  exec \$SHELL"
+echo "✅ Flake rebuild complete!"

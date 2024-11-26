@@ -51,20 +51,36 @@ This will automatically:
 
 ### Package Management
 
-- Add or remove packages:
-  1. Edit the flake.nix file:
-     ```bash
-     chezmoi edit flake.nix
-     ```
-  2. Apply changes:
-     ```bash
-     chezmoi apply
-     ```
-  3. Restart your shell or run:
-     ```bash
-     exec $SHELL
-     ```
-     This ensures new commands are available in your PATH.
+⚠️ **IMPORTANT: Flake Modification Process** ⚠️
+
+When modifying the flake, you MUST follow these exact steps:
+1. Edit the flake using chezmoi:
+   ```bash
+   chezmoi edit flake.nix
+   ```
+2. Navigate to the chezmoi directory:
+   ```bash
+   chezmoi cd
+   ```
+3. Stage the changes:
+   ```bash
+   git add flake.nix
+   ```
+4. Return to home directory:
+   ```bash
+   cd ~/
+   ```
+5. Apply the changes:
+   ```bash
+   chezmoi apply
+   ```
+
+After applying changes:
+- Restart your shell or run:
+  ```bash
+  exec $SHELL
+  ```
+  This ensures new commands are available in your PATH.
 
 The system will automatically:
 - Update the flake lock file
