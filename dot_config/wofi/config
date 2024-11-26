@@ -1,0 +1,33 @@
+# Window Style
+show=drun
+width=400
+height=300
+prompt=Search
+location=center
+allow_markup=true
+allow_images=true
+image_size=24
+
+# Behavior
+term=kitty
+insensitive=true
+hide_scroll=true
+no_actions=true
+matching=contains
+sort_order=default
+gtk_dark=true
+line_wrap=word
+global_coords=false
+
+# Performance
+cache_file=/dev/null
+parse_search=false
+exec_search=false
+
+# Key Bindings
+key_expand=Tab
+key_exit=Escape
+key_down=Down
+key_up=Up
+key_left=Left
+key_right=Right

@@ -1,0 +1,65 @@
+/* Tokyonight colors */
+@define-color bg rgba(26, 27, 38, 0.95);
+@define-color fg #c0caf5;
+@define-color blue #7aa2f7;
+@define-color select_bg rgba(122, 162, 247, 0.2);
+
+* {
+    font-family: "JetBrains Mono", "JetBrainsMono Nerd Font", monospace;
+    font-size: 13px;
+}
+
+window {
+    margin: 5px;
+    padding: 12px;
+    background-color: @bg;
+    border-radius: 16px;
+    border: none;
+}
+
+#input {
+    margin: 4px 8px;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: @fg;
+    border-radius: 8px;
+    outline: none;
+}
+
+#inner-box {
+    margin: 0px;
+    margin-top: 8px;
+    background-color: transparent;
+    padding: 8px;
+}
+
+#outer-box {
+    margin: 0px;
+    background-color: transparent;
+}
+
+#scroll {
+    margin: 0px;
+    background-color: transparent;
+}
+
+#text {
+    margin: 0px;
+    padding: 8px;
+    color: @fg;
+    /* Enable text wrapping */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+#entry {
+    padding: 8px;
+    margin: 4px 8px;
+    background-color: transparent;
+    border-radius: 8px;
+}
+
+#entry:selected {
+    background-color: transparent;
+}

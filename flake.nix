@@ -17,6 +17,7 @@
       corePackages = with pkgs; [
         cowsay
         # Window Manager & Desktop
+        glow
         wofi
         hyprland.packages.${system}.hyprland
         waybar
