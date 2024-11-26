@@ -15,7 +15,9 @@
       };
       # Core packages for the system
       corePackages = with pkgs; [
+        cowsay
         # Window Manager & Desktop
+        wofi
         hyprland.packages.${system}.hyprland
         waybar
         dunst
@@ -23,7 +25,6 @@
         swaybg
         wl-clipboard
         playerctl
-        fuzzel
         # Core Applications
         kitty
         firefox
@@ -55,8 +56,8 @@
         podman-compose
         buildah
         skopeo
-        # docker-client
-        # docker-compose
+        docker-client
+        docker-compose
         distrobox
         # Common development tools
         git
