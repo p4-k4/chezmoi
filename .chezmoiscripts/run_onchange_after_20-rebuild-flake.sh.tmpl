@@ -12,16 +12,20 @@ fi
 
 # Clean up existing profiles
 echo "Removing existing profiles..."
-PROFILES=$(nix profile list | awk '{print $1}' | grep -v "^$")
-if [ -n "$PROFILES" ]; then
-    echo "Found profiles to remove:"
-    echo "$PROFILES"
-    while IFS= read -r profile; do
-        echo "Removing profile: $profile"
-        nix profile remove "$profile"
-    done <<< "$PROFILES"
+while IFS= read -r profile_id; do
+    if [ ! -z "$profile_id" ]; then
+        echo "Removing profile ID: $profile_id"
+        nix profile remove "$profile_id"
+    fi
+done < <(nix profile list | grep -v "^$" | tail -n +2 | cut -d' ' -f1)
+
+# Clean up old generations and garbage collect
+echo "Cleaning up old generations and garbage collecting..."
+if command -v sudo >/dev/null 2>&1; then
+    sudo nix-collect-garbage -d
 else
-    echo "No existing profiles found."
+    echo "Warning: sudo not available. Running garbage collection without root privileges."
+    nix-collect-garbage -d
 fi
 
 # Update and rebuild the flake
