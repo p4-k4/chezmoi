@@ -3,6 +3,8 @@
 # This script runs whenever the flake.nix content changes
 # flake.nix hash: {{ include "flake.nix" | sha256sum }}
 
+set -e  # Exit on error
+
 echo "Detected changes in flake.nix, rebuilding..."
 
 # Source nix if it exists
@@ -10,12 +12,18 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
     . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 
+# Debug: Show current profiles
+echo "Current profiles:"
+nix profile list
+
 # Clean up existing profiles
 echo "Removing existing profiles..."
-if nix profile list | grep -q "default"; then
-    echo "Removing existing default profile..."
-    nix profile remove "git+file://$(pwd)#default" || true
-fi
+while IFS= read -r profile_index; do
+    if [ ! -z "$profile_index" ]; then
+        echo "Removing profile index: $profile_index"
+        nix profile remove "$profile_index" || echo "Failed to remove profile $profile_index"
+    fi
+done < <(nix profile list | grep -v "^$" | awk 'NR>1 {print $1}')
 
 # Clean up old store paths
 echo "Running garbage collection..."
@@ -26,24 +34,30 @@ cd {{ .chezmoi.sourceDir }} && \
 echo "Updating flake..." && \
 nix flake update && \
 echo "Building..." && \
-nix build && \
-echo "Installing new profile..." && \
+nix build
+
+echo "Installing new profile..."
 nix profile install .#default --accept-flake-config
 
-# Verify installation
-if [ $? -eq 0 ]; then
-    echo "Successfully rebuilt and installed new configuration"
-    
-    # Source the new profile to make new commands available immediately
-    if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-    fi
-else
-    echo "Error: Failed to install new configuration"
-    exit 1
+# Debug: Show new profile state
+echo "New profile state:"
+nix profile list
+
+# Source the new profile
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+    echo "Sourcing new profile..."
+    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
 fi
 
-# Verify specific packages are available
-if ! command -v cowsay &> /dev/null; then
-    echo "Warning: cowsay command not found after installation. Please check your flake.nix configuration."
+# Verify installation
+if command -v cowsay &> /dev/null; then
+    echo "Successfully installed cowsay"
+    cowsay "Installation successful!"
+else
+    echo "Error: cowsay not found after installation"
+    echo "Debug information:"
+    echo "PATH=$PATH"
+    echo "Profile contents:"
+    ls -la ~/.nix-profile/bin/
+    exit 1
 fi
